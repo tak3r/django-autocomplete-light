@@ -6,7 +6,9 @@ from django import VERSION
 from django.test import LiveServerTestCase
 
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC # available since 2.26.0
 from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
 from selenium.webdriver.support import ui
@@ -108,6 +110,9 @@ class WidgetTestCase(LiveServerTestCase):
             ui.WebDriverWait(self.selenium, WAIT_TIME).until(
                 lambda x: self.selenium.execute_script('return document.waited'))
 
+    def wait(self):
+        return ui.WebDriverWait(self.selenium, WAIT_TIME)
+
     def submit(self, name=None):
         selector = 'input[type=submit]'
 
@@ -180,6 +185,8 @@ class WidgetTestCase(LiveServerTestCase):
                 'concat(" ", normalize-space(@class), " "), ',
                 '" yourlabs-autocomplete ")',
             ']/*[@data-value]'])
+
+        self.wait().until(EC.presence_of_element_located((By.XPATH, xpath)))
 
         return self.selenium.find_elements_by_xpath(xpath)
 
