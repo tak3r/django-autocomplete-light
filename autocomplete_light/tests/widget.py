@@ -203,7 +203,7 @@ class WidgetTestCase(LiveServerTestCase):
         self.selenium.implicitly_wait(WAIT_TIME)
 
     def unset_implicit_wait(self):
-        self.selenium.implicitly_wait(None)
+        self.selenium.implicitly_wait(0)
 
     def select_values(self):
         self.select  # wait for select
