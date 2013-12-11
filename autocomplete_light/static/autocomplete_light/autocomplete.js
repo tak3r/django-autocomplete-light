@@ -575,6 +575,7 @@ yourlabs.Autocomplete.prototype.fetchComplete = function(jqXHR, textStatus) {
     if (this.xhr == jqXHR) this.xhr = false;
     if (textStatus == 'abort') return;
     this.show(jqXHR.responseText);
+    this.input.trigger('fetchComplete', [this]);
 }
 
 /*

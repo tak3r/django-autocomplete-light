@@ -7,6 +7,7 @@ from django.test import LiveServerTestCase
 
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
 from selenium.webdriver.support import ui
 
@@ -74,13 +75,38 @@ class WidgetTestCase(LiveServerTestCase):
     def open_url(self, url):
         self.selenium.get('%s%s' % (self.live_server_url, url))
 
-    def send_keys(self, keys, autocomplete_name=None):
+    def send_keys(self, keys, autocomplete_name=None, wait='fetchComplete'):
         autocomplete_name = autocomplete_name or self.autocomplete_name
 
-        for key in keys:
-            self.selenium.find_element_by_css_selector(
-                'input[name=%s-autocomplete]' % autocomplete_name
-                ).send_keys(key)
+        if wait == 'fetchComplete':
+            self.selenium.execute_script('''
+                var input = $('input[name="%s-autocomplete"]');
+
+                function doSetupWait() {
+                    document.waited = false;
+                    input.bind('fetchComplete', function(e) {
+                        document.waited=true;
+                        input.unbind('fetchComplete');
+                    });
+                }
+
+                function setupWait() {
+                    if (input.yourlabsAutocomplete().xhr) {
+                        setTimeout(setupWait, 100);
+                    } else {
+                        doSetupWait();
+                    }
+                }
+                setupWait();
+            ''' % autocomplete_name)
+
+        self.selenium.find_element_by_css_selector(
+            'input[name=%s-autocomplete]' % autocomplete_name
+            ).send_keys(keys)
+
+        if wait:
+            ui.WebDriverWait(self.selenium, WAIT_TIME).until(
+                lambda x: self.selenium.execute_script('return document.waited'))
 
     def submit(self, name=None):
         selector = 'input[type=submit]'
@@ -174,10 +200,10 @@ class WidgetTestCase(LiveServerTestCase):
         return self.selenium.find_element_by_xpath(xpath)
 
     def set_implicit_wait(self):
-        self.selenium.implicitly_wait(300 if os.environ.get('TRAVIS', False) else 5)
+        pass
 
     def unset_implicit_wait(self):
-        self.selenium.implicitly_wait(0)
+        pass
 
     def select_values(self):
         self.select  # wait for select
@@ -287,7 +313,7 @@ class KeyboardTestCase(WidgetTestCase):
     def send_keys_wait_assert_choice_number(self, key, choice):
         old_hilight = self.hilighted_choice()
 
-        self.send_keys([key])
+        self.send_keys([key], wait=False)
         ui.WebDriverWait(self.selenium, WAIT_TIME).until(
             lambda x: old_hilight != self.hilighted_choice())
 
@@ -306,7 +332,7 @@ class KeyboardTestCase(WidgetTestCase):
         self.send_keys_wait_assert_choice_number(Keys.ARROW_UP, 0)
 
     def test_04_tab_to_select_choice(self):
-        self.send_keys([Keys.TAB])
+        self.send_keys([Keys.TAB], wait=False)
         self.assertSameChoice(self.autocomplete_choices()[0], self.deck_choices()[0])
         self.assertEqual(self.select_values(), ['4'])
 
