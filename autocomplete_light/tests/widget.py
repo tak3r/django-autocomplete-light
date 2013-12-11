@@ -107,7 +107,7 @@ class WidgetTestCase(LiveServerTestCase):
             ).send_keys(keys)
 
         if wait:
-            ui.WebDriverWait(self.selenium, WAIT_TIME).until(
+            self.wait().until(
                 lambda x: self.selenium.execute_script('return document.waited'))
 
     def wait(self):
