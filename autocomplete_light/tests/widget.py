@@ -200,10 +200,10 @@ class WidgetTestCase(LiveServerTestCase):
         return self.selenium.find_element_by_xpath(xpath)
 
     def set_implicit_wait(self):
-        pass
+        self.selenium.implicitly_wait(WAIT_TIME)
 
     def unset_implicit_wait(self):
-        pass
+        self.selenium.implicitly_wait(None)
 
     def select_values(self):
         self.select  # wait for select
