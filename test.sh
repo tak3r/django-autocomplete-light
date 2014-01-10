@@ -6,6 +6,7 @@ set -x
 set -e
 
 WORKSPACE="${WORKSPACE:-$(pwd)}"
+PG_VIRTUALENV="${PG_VIRTUALENV:-$WORKSPACE/pg_virtualenv}"
 CLEAN_VIRTUALENV="${CLEAN_VIRTUALENV:-0}"
 DJANGO_TAGGIT="${DJANGO_TAGGIT:-1}"
 DJANGO_GENERIC_M2M="${DJANGO_GENERIC_M2M:-1}"
@@ -47,7 +48,7 @@ pip install $DJANGO_TAGGIT $DJANGO_GENERIC_M2M \
 
 cd $WORKSPACE
 # NOTE: pg_virtualenv sets PGDATABASE, PGUSER, PGPASSWORD, PGHOST, PGPORT
-pg_virtualenv xvfb-run -a $XVFB_FLAGS test_project/manage.py test autocomplete_light --noinput --liveserver=localhost:9000-9200 --settings=test_project.settings_postgres
+$PG_VIRTUALENV xvfb-run -a $XVFB_FLAGS test_project/manage.py test autocomplete_light --noinput --liveserver=localhost:9000-9200 --settings=test_project.settings_postgres
 
 RET="$?"
 
