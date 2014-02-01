@@ -497,7 +497,7 @@ yourlabs.Autocomplete.prototype.move = function(e) {
     }
 
     // Avoid moving the cursor in the input.
-    e.preventDefault();
+    // e.preventDefault();
 
     // Trigger hilightChoice on the target choice.
     this.input.trigger('hilightChoice',
